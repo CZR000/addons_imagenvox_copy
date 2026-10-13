@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Documents Portal - Compartir archivos entre carpetas',
-    'version': '18.0.3.3.0',
+    'version': '18.0.3.4.0',
     'category': 'Document Management',
     'summary': 'Compartir archivos entre carpetas sin duplicar el original',
     'description': """
@@ -38,6 +38,7 @@ Características:
         'wizards/share_to_folders_wizard_views.xml',
         'wizards/confirm_delete_attachment_wizard_views.xml',
         'views/documents_folder_views.xml',
+        'data/folder_last_update_data.xml',
     ],
     'installable': True,
     'application': False,

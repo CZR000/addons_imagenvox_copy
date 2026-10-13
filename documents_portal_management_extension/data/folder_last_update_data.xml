@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Rellena "Última actualización" en carpetas existentes (solo si hay carpetas sin fecha) -->
+    <function model="documents.folders" name="_init_last_update_date"/>
+</odoo>

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Documents Portal Management - Extension',
-    'version': '18.0.7.6.9',
+    'version': '18.0.7.7.0',
     'summary': 'Custom extensions for Documents Portal Management module',
     'description': """
         Customizations over documents_portal_management:
@@ -22,6 +22,7 @@
         'views/folders_views_inherit.xml',
         'views/menus.xml',
         'views/portal_templates_inherit.xml',
+        'data/folder_last_update_data.xml',
     ],
     'assets': {
         'web.assets_backend': [

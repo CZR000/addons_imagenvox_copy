@@ -1,10 +1,17 @@
 # -*- coding: utf-8 -*-
 import base64
-from odoo import models, _
+from odoo import models, api, _
 
 
 class IrAttachment(models.Model):
     _inherit = 'ir.attachment'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        records = super().create(vals_list)
+        # Última actualización: solo cuando se sube un documento a una carpeta
+        records.sudo().mapped('folder_id')._touch_last_update()
+        return records
 
     def action_download(self):
         self.ensure_one()

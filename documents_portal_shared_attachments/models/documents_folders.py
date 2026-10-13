@@ -150,6 +150,22 @@ class DocumentFolders(models.Model):
             att.sudo().with_context(skip_doctor_sync=True).write(
                 {'shared_folder_ids': [(3, doctor.id)]})
 
+    @api.model
+    def _init_last_update_date_shared(self):
+        """
+        Complementa "Última actualización" con los documentos compartidos
+        (carpetas de doctor): toma la fecha de subida más reciente de los
+        archivos compartidos en cada carpeta. Solo aumenta fechas, nunca las baja.
+        """
+        groups = self.env['ir.attachment'].sudo()._read_group(
+            [('shared_folder_ids', '!=', False)],
+            groupby=['shared_folder_ids'],
+            aggregates=['create_date:max'],
+        )
+        self._apply_last_update_dates({
+            folder.id: max_date for folder, max_date in groups if folder and max_date
+        })
+
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)

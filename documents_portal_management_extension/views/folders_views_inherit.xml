@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
+    <!-- Lista para Carpetas del Doctor / Paciente: ordenada por última actualización -->
+    <record id="folder_view_list_last_update" model="ir.ui.view">
+        <field name="name">documents.folders.list.last.update</field>
+        <field name="model">documents.folders</field>
+        <field name="inherit_id" ref="documents_portal_management.folder_view_list"/>
+        <field name="mode">primary</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="default_order">last_update_date desc, name</attribute>
+            </xpath>
+            <!-- Sin arrastrar y soltar: el orden lo define la última actualización -->
+            <xpath expr="//field[@name='sequence']" position="replace"/>
+        </field>
+    </record>
+
     <!-- Acción para listar las carpetas de usuarios de portal (doctores)-->
     <record id="action_portal_user_folders" model="ir.actions.act_window">
         <field name="name">Carpetas del Doctor</field>
@@ -10,6 +26,7 @@
         <field name="domain">[('is_personal_directory', '=', True)]</field>
         <field name="view_ids" eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('documents_portal_management.folder_view_kanban')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('folder_view_list_last_update')}),
             (0, 0, {'view_mode': 'form', 'view_id': False})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -28,6 +45,7 @@
         <field name="context">{'default_is_patient_directory': True}</field>
         <field name="view_ids" eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('documents_portal_management.folder_view_kanban')}),
+            (0, 0, {'view_mode': 'list', 'view_id': ref('folder_view_list_last_update')}),
             (0, 0, {'view_mode': 'form', 'view_id': False})]"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -211,8 +229,31 @@
             <xpath expr="//field[@name='company_id']" position="after">
                 <field name="create_uid" string="Creado por" readonly="1"/>
                 <field name="create_date" string="Fecha de creación" readonly="1"/>
+                <field name="last_update_date" string="Última actualización" readonly="1"/>
             </xpath>
 
+        </field>
+    </record>
+
+    <!-- Herencia search: filtros y agrupación por última actualización -->
+    <record id="folder_view_search_inherit_last_update" model="ir.ui.view">
+        <field name="name">documents.folders.search.inherit.last.update</field>
+        <field name="model">documents.folders</field>
+        <field name="inherit_id" ref="documents_portal_management.folder_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='by_parent']" position="before">
+                <separator/>
+                <filter name="updated_7_days" string="Actualizadas últimos 7 días"
+                        domain="[('last_update_date', '&gt;=', (context_today() - relativedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                <filter name="updated_30_days" string="Actualizadas últimos 30 días"
+                        domain="[('last_update_date', '&gt;=', (context_today() - relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <filter name="without_documents" string="Sin documentos subidos"
+                        domain="[('last_update_date', '=', False)]"/>
+                <filter name="filter_last_update" string="Última actualización" date="last_update_date"/>
+                <separator/>
+                <filter name="group_last_update" string="Última actualización (mes)"
+                        context="{'group_by': 'last_update_date:month'}"/>
+            </xpath>
         </field>
     </record>
 

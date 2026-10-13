@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Complementa "Última actualización" con documentos compartidos (carpetas de doctor) -->
+    <function model="documents.folders" name="_init_last_update_date_shared"/>
+</odoo>
