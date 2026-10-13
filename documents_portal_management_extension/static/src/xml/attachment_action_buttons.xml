@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="documents_portal_management_extension.AttachmentActionButtons">
+        <div class="d-flex gap-1 attachment-action-buttons">
+            <button
+                t-if="props.record.data.mimetype === 'application/pdf' or 
+                      props.record.data.mimetype === 'image/png' or 
+                      props.record.data.mimetype === 'image/jpeg' or 
+                      props.record.data.mimetype === 'image/jpg'"
+                class="btn btn-sm btn-light o_attachment_btn"
+                t-on-click="onClickPreview"
+                title="Previsualizar">
+                <i class="fa fa-eye"/>
+            </button>
+            
+            <button
+                t-if="props.record.data.mimetype === 'application/msword' or
+                      props.record.data.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'"
+                class="btn btn-sm btn-light o_attachment_btn"
+                t-on-click="onClickEdit"
+                title="Editar archivo">
+                <i class="fa fa-pencil"/>
+            </button>
+        </div>
+    </t>
+</templates>

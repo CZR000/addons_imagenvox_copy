@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Vista de lista heredada de pos.order -->
+    <record id="view_pos_order_tree_custom" model="ir.ui.view">
+        <field name="name">pos.order.tree.custom</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            
+            <!-- Cambiar etiqueta de partner_id a "Paciente" -->
+            <field name="partner_id" position="attributes">
+                <attribute name="string">Paciente</attribute>
+            </field>
+            
+            <!-- Agregar campo seller_tag_ids después de partner_id -->
+            <field name="partner_id" position="after">
+                <field name="seller_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+            </field>
+            
+        </field>
+    </record>
+
+</odoo>

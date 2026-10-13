@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Herencia form de ir.attachment: agrega campo compartir usuarios, oculta Indexed Content -->
+    <record id="view_attachment_form_inherit_shared_users" model="ir.ui.view">
+        <field name="name">ir.attachment.form.inherit.shared.users</field>
+        <field name="model">ir.attachment</field>
+        <field name="inherit_id" ref="base.view_attachment_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Agregar campo "Compartir con usuarios" debajo de mimetype -->
+            <field name="mimetype" position="after">
+                <field name="shared_user_ids"
+                       string="Compartir con usuarios"
+                       domain="[('id', '!=', uid)]"
+                       widget="many2many_tags"
+                       options="{'color_field': 'color'}"
+                       groups="documents_portal_management.group_document_user,
+                               documents_portal_management.group_document_manager"/>
+            </field>
+
+            <!-- Ocultar grupo "Indexed Content" (campo index_content y su contenedor) -->
+            <xpath expr="//field[@name='index_content']/.." position="replace"/>
+
+        </field>
+    </record>
+
+    <!-- Modifica acción "Todos los Documentos": filtra solo archivos del portal y activa nueva_carpeta_mode -->
+    <record id="documents_portal_management.view_attachment_action_all_documents"
+            model="ir.actions.act_window">
+        <field name="domain">[(
+            'res_model', 'not in', ['ir.ui.view', 'ir.module.module']),
+            '|',
+            ('is_portal_directory', '=', True),
+            ('is_personal_directory', '=', True)
+        ]</field>
+        <field name="context">{'nueva_carpeta_mode': True}</field>
+    </record>
+
+</odoo>

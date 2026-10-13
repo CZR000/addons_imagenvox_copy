@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!--
+        Vista form simplificada para crear subcarpetas desde el diálogo.
+        Solo muestra: Nombre + Carpeta Padre.
+        Sin tabs, sin notebook.
+        Se referencia desde el context del field children_folder_ids
+        en folders_views_inherit.xml usando 'form_view_ref'.
+    -->
+    <record id="folder_view_form_dialog_subcarpeta" model="ir.ui.view">
+        <field name="name">documents.folders.form.dialog.subcarpeta</field>
+        <field name="model">documents.folders</field>
+        <field name="priority">100</field>
+        <field name="arch" type="xml">
+            <form string="Crear Sub Carpeta">
+                <sheet>
+                    <field name="image"
+                        widget="image"
+                        class="oe_avatar"
+                        options="{'preview_image': 'image', 'size': [90, 90]}"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="E.g. Finance" required="1"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="parent_folder_id"
+                            string="Carpeta Padre"
+                            readonly="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Documentos">
+                            <field name="attachment_ids">
+                                <list string="Documentos">
+                                    <field name="name"/>
+                                    <field name="type"/>
+                                    <field name="create_uid"/>
+                                    <field name="create_date" readonly="1"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>

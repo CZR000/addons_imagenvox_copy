@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Acción para listar las carpetas de usuarios de portal (doctores)-->
+    <record id="action_portal_user_folders" model="ir.actions.act_window">
+        <field name="name">Carpetas del Doctor</field>
+        <field name="res_model">documents.folders</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('is_personal_directory', '=', True)]</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('documents_portal_management.folder_view_kanban')}),
+            (0, 0, {'view_mode': 'form', 'view_id': False})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No hay carpetas de doctores creadas aún.
+            </p>
+        </field>
+    </record>
+
+    <!-- Acción para listar las carpetas de pacientes -->
+    <record id="action_patient_folders" model="ir.actions.act_window">
+        <field name="name">Carpetas del Paciente</field>
+        <field name="res_model">documents.folders</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="domain">[('is_patient_directory', '=', True)]</field>
+        <field name="context">{'default_is_patient_directory': True}</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('documents_portal_management.folder_view_kanban')}),
+            (0, 0, {'view_mode': 'form', 'view_id': False})]"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Crea una nueva carpeta de paciente
+            </p>
+        </field>
+    </record>
+
+    <!-- Herencia kanban: quitar modo móvil para permitir el search panel lateral -->
+    <record id="folder_view_kanban_inherit_desktop" model="ir.ui.view">
+        <field name="name">documents.folders.kanban.inherit.desktop</field>
+        <field name="model">documents.folders</field>
+        <field name="inherit_id" ref="documents_portal_management.folder_view_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="class">o_kanban_dashboard</attribute>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Herencia search: agregar panel lateral por carpeta padre -->
+    <record id="folder_view_search_inherit_panel" model="ir.ui.view">
+        <field name="name">documents.folders.search.inherit.panel</field>
+        <field name="model">documents.folders</field>
+        <field name="inherit_id" ref="documents_portal_management.folder_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <searchpanel>
+                    <field name="parent_folder_id"
+                           string="Carpeta Padre"
+                           icon="fa-folder"
+                           enable_counters="1"
+                           hierarchize="1"/>/>
+                </searchpanel>
+            </xpath>
+        </field>
+    </record>
+    
+    <!-- Excluir carpetas de portal de la vista principal de Carpetas -->
+    <record id="documents_portal_management.folder_action" model="ir.actions.act_window">
+        <field name="domain">[('is_personal_directory', '=', False), ('is_patient_directory', '=', False)]</field>
+    </record>
+
+    <!-- Herencia form: agrega botón Nuevo Archivo, oculta Modelo, mejora pestañas Documentos y Subcarpetas -->
+    <record id="folder_view_form_inherit_new_attachment" model="ir.ui.view">
+        <field name="name">documents.folders.form.inherit.new.attachment</field>
+        <field name="model">documents.folders</field>
+        <field name="inherit_id" ref="documents_portal_management.folder_view_form"/>
+        <field name="arch" type="xml">
+    
+            <!-- Botón "Nuevo Archivo" -->
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    name="action_new_attachment"
+                    type="object"
+                    string="Nuevo Archivo / URL"
+                    icon="fa-plus"
+                    class="oe_stat_button"
+                    groups="documents_portal_management.group_document_manager,
+                            documents_portal_management.group_document_user"/>
+            </xpath>
+    
+            <!-- Ocultar campo Modelo -->
+            <xpath expr="//field[@name='model_id']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+    
+            <!-- Ocultar parent_folder_id cuando is_principal está marcado -->
+            <xpath expr="//field[@name='parent_folder_id']" position="attributes">
+                <attribute name="invisible">is_principal == True</attribute>
+            </xpath>
+    
+            <!-- Agregar campos is_principal y is_patient_directory después de parent_folder_id -->
+            <xpath expr="//field[@name='parent_folder_id']" position="after">
+                <field name="is_principal"
+                    string="Es Carpeta Principal ?"
+                    invisible="parent_folder_id != False"/>
+                <field name="is_patient_directory" invisible="1"/>
+            </xpath>
+    
+            <!-- Reemplazar page[1] (Documents) con los 4 tabs nuevos -->
+            <xpath expr="//notebook/page[1]" position="replace">
+    
+                <!-- ═══ CARPETA PRINCIPAL: Subcarpetas → Documentos ═══ -->
+                <page string="Subcarpetas"
+                    invisible="not is_principal or is_personal_directory or is_portal_directory or is_patient_directory">
+                    <field name="children_folder_ids"
+                        context="{
+                            'default_parent_folder_id': id,
+                            'form_view_ref': 'documents_portal_management_extension.folder_view_form_dialog_subcarpeta'
+                        }">
+                        <list string="Subcarpetas">
+                            <field name="name" required="1"/>
+                            <button
+                                string="Abrir"
+                                type="object"
+                                name="action_open_folder_form"
+                                icon="fa-external-link"
+                                class="btn btn-sm"/>
+                        </list>
+                    </field>
+                </page>
+    
+                <page string="Documentos" invisible="not is_principal">
+                    <field name="attachment_ids">
+                        <list string="Documentos" create="false" delete="false">
+                            <field name="name"/>
+                            <field name="mimetype" column_invisible="1"/>
+                            <field name="type"/>
+                            <field name="create_uid"/>
+                            <field name="create_date" readonly="1"/>
+                            <field name="id" widget="attachment_action_buttons" string="Acciones" nolabel="1"/>
+                            <button string="Descargar" type="object" name="action_download"
+                                    icon="fa-download" class="btn btn-sm"/>
+                            <button string="Eliminar" type="object" name="unlink"
+                                    icon="fa-trash" class="btn btn-sm text-danger"
+                                    confirm="¿Está seguro de eliminar este documento? Esta acción no se puede deshacer."/>
+                        </list>
+                    </field>
+                </page>
+    
+                <!-- ═══ CARPETA HIJA: Documentos → Subcarpetas ═══ -->
+                <page string="Documentos" invisible="is_principal">
+                    <field name="attachment_ids">
+                        <list string="Documentos" create="false" delete="false">
+                            <field name="name"/>
+                            <field name="mimetype" column_invisible="1"/>
+                            <field name="type"/>
+                            <field name="create_uid"/>
+                            <field name="create_date" readonly="1"/>
+                            <field name="id" widget="attachment_action_buttons" string="Acciones" nolabel="1"/>
+                            <button string="Descargar" type="object" name="action_download"
+                                    icon="fa-download" class="btn btn-sm"/>
+                            <button string="Eliminar" type="object" name="unlink"
+                                    icon="fa-trash" class="btn btn-sm text-danger"
+                                    confirm="¿Está seguro de eliminar este documento? Esta acción no se puede deshacer."/>
+                        </list>
+                    </field>
+                </page>
+    
+                <page string="Subcarpetas"
+                    invisible="is_principal or is_personal_directory or is_portal_directory or is_patient_directory">
+                    <field name="children_folder_ids"
+                        context="{
+                            'default_parent_folder_id': id,
+                            'form_view_ref': 'documents_portal_management_extension.folder_view_form_dialog_subcarpeta'
+                        }">
+                        <list string="Subcarpetas">
+                            <field name="name" required="1"/>
+                            <button
+                                string="Abrir"
+                                type="object"
+                                name="action_open_folder_form"
+                                icon="fa-external-link"
+                                class="btn btn-sm"/>
+                        </list>
+                    </field>
+                </page>
+    
+            </xpath>
+    
+            <!-- Eliminar page[2] original (Subfolders) que tras el replace queda en posición 5 -->
+            <xpath expr="//notebook/page[5]" position="replace"/>
+    
+        </field>
+    </record>
+
+    <!-- Herencia lista: oculta columna Modelo, agrega columnas Creado por y Fecha de creación -->
+    <record id="folder_view_list_inherit_custom" model="ir.ui.view">
+        <field name="name">documents.folders.list.inherit.custom</field>
+        <field name="model">documents.folders</field>
+        <field name="inherit_id" ref="documents_portal_management.folder_view_list"/>
+        <field name="arch" type="xml">
+
+            <!-- Ocultar columna Modelo -->
+            <xpath expr="//field[@name='model_id']" position="attributes">
+                <attribute name="column_invisible">1</attribute>
+            </xpath>
+
+            <!-- Agregar columnas Creado por y Fecha de creación después de Empresa -->
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="create_uid" string="Creado por" readonly="1"/>
+                <field name="create_date" string="Fecha de creación" readonly="1"/>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

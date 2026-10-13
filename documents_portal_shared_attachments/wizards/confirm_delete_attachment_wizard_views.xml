@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_confirm_delete_attachment_wizard_form" model="ir.ui.view">
+        <field name="name">documents.confirm.delete.attachment.wizard.form</field>
+        <field name="model">documents.confirm.delete.attachment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirmar eliminación">
+                <sheet>
+                    <div class="alert alert-warning" role="alert">
+                        <h4>
+                            <i class="fa fa-exclamation-triangle"/>
+                            Este archivo está compartido en
+                            <field name="shared_folder_count" readonly="1" nolabel="1"/>
+                            carpeta(s) adicionales
+                        </h4>
+                        <p>
+                            Si continúa, el archivo se eliminará permanentemente y dejará de estar disponible en todas las carpetas donde está compartido.
+                        </p>
+                    </div>
+                    <group>
+                        <field name="attachment_id" readonly="1"/>
+                        <field name="shared_folder_ids" widget="many2many_tags" readonly="1"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button string="Eliminar de todas las carpetas"
+                            type="object" name="action_confirm_delete" class="btn-danger"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

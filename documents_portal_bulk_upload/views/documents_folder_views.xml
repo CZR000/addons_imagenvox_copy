@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- =================================================================== -->
+    <!-- Asistente "Subir documentos"                                        -->
+    <!-- =================================================================== -->
+    <record id="view_bulk_upload_wizard_form" model="ir.ui.view">
+        <field name="name">documents.bulk.upload.wizard.form</field>
+        <field name="model">documents.bulk.upload.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Subir documentos">
+                <group>
+                    <field name="folder_id" readonly="1"/>
+                </group>
+                <field name="attachment_ids" widget="many2many_binary"
+                       string="Arrastra o selecciona los archivos"/>
+                <footer>
+                    <button name="action_upload" type="object"
+                            string="Subir" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- =================================================================== -->
+    <!-- Herencia de la form de documents.folders: botón en el header        -->
+    <!-- La form base no tiene <header>: lo creamos antes del <sheet>.       -->
+    <!-- =================================================================== -->
+    <record id="view_documents_folders_form_bulk_upload" model="ir.ui.view">
+        <field name="name">documents.folders.form.bulk.upload</field>
+        <field name="model">documents.folders</field>
+        <field name="inherit_id"
+               ref="documents_portal_management.folder_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button name="action_bulk_upload" type="object"
+                            string="Subir documentos (masivo)" class="btn-primary"
+                            icon="fa-upload"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_website_menu_mega_item_public,website.menu.mega.item.public,model_website_menu_mega_item,base.group_public,1,0,0,0
+access_website_menu_mega_item_portal,website.menu.mega.item.portal,model_website_menu_mega_item,base.group_portal,1,0,0,0
+access_website_menu_mega_item_user,website.menu.mega.item.user,model_website_menu_mega_item,base.group_user,1,0,0,0
+access_website_menu_mega_item_designer,website.menu.mega.item.designer,model_website_menu_mega_item,website.group_website_designer,1,1,1,1
+access_website_menu_mega_subitem_public,website.menu.mega.subitem.public,model_website_menu_mega_subitem,base.group_public,1,0,0,0
+access_website_menu_mega_subitem_portal,website.menu.mega.subitem.portal,model_website_menu_mega_subitem,base.group_portal,1,0,0,0
+access_website_menu_mega_subitem_user,website.menu.mega.subitem.user,model_website_menu_mega_subitem,base.group_user,1,0,0,0
+access_website_menu_mega_subitem_designer,website.menu.mega.subitem.designer,model_website_menu_mega_subitem,website.group_website_designer,1,1,1,1

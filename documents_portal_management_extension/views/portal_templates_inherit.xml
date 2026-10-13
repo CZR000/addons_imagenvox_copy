@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Desactivar template original de Documents en Mi Cuenta -->
+    <record id="documents_portal_management.portal_my_home_documents"
+            model="ir.ui.view">
+        <field name="active" eval="False"/>
+    </record>
+
+    <!-- Icono "Documentos" siempre visible en Mi Cuenta -->
+    <template id="portal_my_home_documents_extension"
+              name="Documents (always visible)"
+              inherit_id="portal.portal_my_home"
+              priority="25">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/documents_portal_management/static/src/img/document.svg'"/>
+                <t t-set="title">Documentos</t>
+                <t t-set="text">Sigue tus Documentos</t>
+                <t t-set="url" t-value="'/my/documents'"/>
+                <t t-set="placeholder_count" t-value="'documents_count'"/>
+                <t t-set="config_card" t-value="True"/>
+            </t>
+        </div>
+    </template>
+
+    <!-- Formulario portal para agregar un link externo -->
+    <record id="portal_add_link_form" model="ir.ui.view">
+        <field name="name">portal.add.link.form</field>
+        <field name="key">document_portal_management_extension.portal_add_link_form</field>
+        <field name="type">qweb</field>
+        <field name="arch" type="xml">
+            <t t-name="document_portal_management_extension.portal_add_link_form">
+                <t t-call="portal.portal_layout">
+                    <div id="wrap" class="oe_structure oe_empty">
+                        <section class="s_title parallax s_parallax_is_fixed bg-black-50 pt24 pb24"
+                                 data-vcss="001" data-snippet="s_title"
+                                 data-scroll-background-ratio="1">
+                            <span class="s_parallax_bg oe_img_bg"
+                                  style="background-image: url('/web/image/website.s_banner_default_image');
+                                         background-position: 50% 0;"/>
+                            <div class="o_we_bg_filter bg-black-50"/>
+                            <div class="container" style="margin-left:10px;">
+                                <h1>Agregar Link</h1>
+                            </div>
+                        </section>
+
+                        <section class="s_text_block pt40 pb40 o_portal_quick_quotation"
+                                 data-snippet="s_text_block">
+                            <div class="container s_allow_columns">
+                                <div class="row">
+                                    <t t-if="error == 'name'">
+                                        <div class="alert alert-danger col-12 mb-3">
+                                            Por favor ingresa un nombre para el link.
+                                        </div>
+                                    </t>
+                                    <t t-if="error == 'url'">
+                                        <div class="alert alert-danger col-12 mb-3">
+                                            Por favor ingresa una URL válida.
+                                        </div>
+                                    </t>
+                                    <form action="/my/documents/add_link/save" method="post">
+                                        <input type="hidden" name="csrf_token"
+                                               t-att-value="request.csrf_token()"/>
+                                        <div class="form-group row mb-3">
+                                            <label for="link_name" class="col-2 col-form-label">
+                                                Nombre
+                                            </label>
+                                            <div class="col-10">
+                                                <input type="text" name="link_name" id="link_name"
+                                                       class="form-control"
+                                                       placeholder="E.g. Company Website"
+                                                       required="required"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row mb-3">
+                                            <label for="link_url" class="col-2 col-form-label">
+                                                URL
+                                            </label>
+                                            <div class="col-10">
+                                                <input type="url" name="link_url" id="link_url"
+                                                       class="form-control"
+                                                       placeholder="https://example.com"
+                                                       required="required"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-2"/>
+                                            <div class="col-10 d-flex gap-2">
+                                                <button id="btn_save_link" type="submit"
+                                                        class="btn btn-primary mt-2">
+                                                    Guardar
+                                                </button>
+                                                <a href="/my/documents"
+                                                   class="btn btn-secondary mt-2">
+                                                    Cancelar
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+                </t>
+            </t>
+        </field>
+    </record>
+
+    <!-- BREADCRUMB: soporte para nivel carpeta -->
+    <template
+        id="portal_my_home_menu_documents_ext"
+        name="Portal Breadcrumb: folder level"
+        inherit_id="documents_portal_management.portal_my_home_menu_documents"
+        priority="23">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <!--
+                'folder' existe solo en portal_folder_documents.
+                Es el nivel activo (sin link) porque no hay
+                sub-nivel después de la carpeta.
+            -->
+            <li t-if="folder" class="breadcrumb-item active">
+                <t t-esc="folder.name"/>
+            </li>
+        </xpath>
+    </template>
+
+    <!-- VISTA PRINCIPAL: grid de carpetas -->
+    <template
+        id="portal_my_documents_folders"
+        name="My Documents – Folder Grid">
+        <t t-call="portal.portal_layout">
+
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Documentos</t>
+                <!-- Botones de acción en la barra superior -->
+                <div class="ms-lg-2 d-flex gap-2" t-if="request.env.user">
+                    <a class="btn btn-primary"
+                       title="Upload Portal Document"
+                       href="/my/documents/upload_portal_documents">
+                        <i class="fa fa-upload"/> Subir Documento
+                    </a>
+                    <a class="btn btn-secondary"
+                       title="Add Link"
+                       href="/my/documents/add_link">
+                        <i class="fa fa-link"/> Agregar Link
+                    </a>
+                </div>
+            </t>
+
+            <!-- Sin carpetas -->
+            <t t-if="not has_folders">
+                <div class="alert alert-info mt-3">
+                    No tienes documentos disponibles en este momento.
+                </div>
+            </t>
+
+            <!-- Grid de carpetas -->
+            <t t-if="has_folders">
+                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 mt-2">
+                    <t t-foreach="folder_data" t-as="fd">
+                        <div class="col">
+                            <a t-attf-href="/my/documents/folder/{{ fd['folder'].id }}"
+                               class="text-decoration-none">
+                                <div class="card h-100 text-center border-0 shadow-sm portal-folder-card">
+                                    <div class="card-body py-4">
+                                        <i class="fa fa-folder fa-4x text-warning mb-3"
+                                           aria-hidden="true"/>
+                                        <p class="card-title fw-semibold text-dark mb-1 text-truncate"
+                                           t-esc="fd['folder'].name"/>
+                                        <small class="text-muted">
+                                            <t t-esc="fd['count']"/>
+                                            <t t-if="fd['count'] == 1"> archivo</t>
+                                            <t t-else=""> archivos</t>
+                                        </small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </t>
+                </div>
+            </t>
+
+        </t>
+    </template>
+
+    <!-- VISTA DETALLE: lista de archivos de una carpeta -->
+    <template
+        id="portal_folder_documents"
+        name="Folder Documents – File List">
+        <t t-call="portal.portal_layout">
+
+            <div class="o_portal_search_panel my-3">
+                <h3 class="mb-2" t-esc="folder.name"/>
+                <t t-if="searchbar_sortings">
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="mb-0 text-muted">Ordenar por:</label>
+                        <div class="dropdown">
+                            <a href="#" role="button"
+                               class="btn btn-secondary dropdown-toggle"
+                               data-bs-toggle="dropdown"
+                               aria-expanded="false">
+                                <t t-esc="searchbar_sortings[sortby]['label']"/>
+                            </a>
+                            <div class="dropdown-menu" role="menu">
+                                <t t-foreach="searchbar_sortings" t-as="option">
+                                    <a role="menuitem"
+                                       t-att-href="'?' + keep_query('*', sortby=option)"
+                                       class="dropdown-item">
+                                        <t t-esc="searchbar_sortings[option]['label']"/>
+                                    </a>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+
+            <!-- Sin archivos -->
+            <t t-if="not documents">
+                <div class="alert alert-info mt-3">
+                    Esta carpeta no tiene archivos disponibles.
+                </div>
+            </t>
+
+            <!-- Tabla de archivos -->
+            <t t-if="documents" t-call="portal.portal_table">
+                <thead>
+                    <tr class="thead-light">
+                        <th>Código</th>
+                        <th class="text-left">Nombre</th>
+                        <th class="text-left">Tipo</th>
+                        <th class="text-left">Fecha</th>
+                        <th class="text-center">Descarga</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="documents" t-as="document">
+                        <tr>
+                            <!-- Código + badge -->
+                            <td>
+                                <t t-if="document.is_personal_directory and not document.res_model">
+                                    <span class="badge badge-success">
+                                        <i class="fa fa-user"/>
+                                    </span>
+                                </t>
+                                <t t-if="document.res_model">
+                                    <span class="badge badge-primary">
+                                        <i class="fa fa-user"/>
+                                    </span>
+                                </t>
+                                <!--
+                                    Usar /web/get_attachments_data para pasar
+                                    por la validación de acceso del controlador
+                                -->
+                                <a t-attf-href="/web/get_attachments_data?id={{ document.id }}">
+                                    <t t-esc="document.code"/>
+                                </a>
+                                <t t-if="document.is_shared_file">
+                                    <span> (Dueño: </span>
+                                    <span t-field="document.create_uid.name"/>
+                                    <span>)</span>
+                                </t>
+                            </td>
+                            <!-- Nombre -->
+                            <td><span t-field="document.name"/></td>
+                            <!-- Mimetype -->
+                            <td><span t-field="document.mimetype"/></td>
+                            <!-- Fecha -->
+                            <td><span t-field="document.create_date"/></td>
+                            <!-- Descarga -->
+                            <td class="text-center portal-attachment-download">
+                                <a t-attf-href="/web/get_attachments_data?id={{ document.id }}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   title="Descargar">
+                                    <i class="fa fa-download"
+                                       t-att-data-attachment-id="document.id"/>
+                                </a>
+                                <t t-if="document.is_shared_file">
+                                    <span class="badge badge-info ms-1">
+                                        <i class="fa fa-share"/>
+                                    </span>
+                                </t>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </t>
+
+            <!-- Pager -->
+            <div class="o_portal_pager text-center mt-3">
+                <t t-if="pager" t-call="portal.pager">
+                    <t t-set="pager" t-value="pager"/>
+                </t>
+            </div>
+
+        </t>
+    </template>
+
+</odoo>

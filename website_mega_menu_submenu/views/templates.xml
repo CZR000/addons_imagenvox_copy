@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <template id="dynamic_mega_menu_from_db" name="Dynamic Mega Menu from Database">
+        <section class="s_mega_menu_little_icons overflow-hidden o_colored_level o_cc o_cc1 pb16 pt16 px-0">
+            <div class="container-fluid px-3">
+                <div class="row">
+                    <t t-foreach="submenu.mega_menu_item_ids.filtered(lambda x: x.is_visible).sorted(key=lambda x: x.sequence)" 
+                       t-as="mega_item">
+                        
+                        <div t-attf-class="col-12 py-2 d-flex align-items-start o_colored_level col-lg-{{mega_item.column_width or 3}}">
+                            <nav class="nav flex-column">
+                                
+                                <!-- Item sin submenú -->
+                                <t t-if="not mega_item.has_submenu and mega_item.url">
+                                    <a t-att-href="mega_item.url"
+                                       class="nav-link o_default_snippet_text px-2 rounded text-wrap"
+                                       data-name="Menu Item"
+                                       t-att-target="'_blank' if mega_item.new_window else None">
+                                        <i t-if="mega_item.icon" 
+                                           t-attf-class="s_mega_menu_little_icons_icon fa {{mega_item.icon}} fa-fw me-2"/>
+                                        <b t-esc="mega_item.name"/>
+                                    </a>
+                                </t>
+                                
+                                <!-- Item con submenú -->
+                                <t t-else="">
+                                    <!-- Título -->
+                                    <div class="nav-link px-2 text-wrap mega-menu-parent-item">
+                                        <i t-if="mega_item.icon" 
+                                           t-attf-class="s_mega_menu_little_icons_icon fa {{mega_item.icon}} fa-fw me-2"/>
+                                        <b t-esc="mega_item.name"/>
+                                    </div>
+                                    
+                                    <!-- Contenedor ABSOLUTO para sub-items -->
+                                    <div class="mega-menu-submenu-container">
+                                        <t t-foreach="mega_item.submenu_item_ids.filtered(lambda x: x.is_visible).sorted(key=lambda x: x.sequence)" 
+                                           t-as="sub_item">
+                                            <a t-att-href="sub_item.url"
+                                               class="nav-link o_default_snippet_text rounded text-wrap mega-menu-sub-item"
+                                               data-name="Submenu Item"
+                                               t-att-target="'_blank' if sub_item.new_window else None">
+                                                <i t-if="sub_item.icon" 
+                                                   t-attf-class="s_mega_menu_little_icons_icon fa {{sub_item.icon}} fa-fw me-2"/>
+                                                <span t-esc="sub_item.name"/>
+                                            </a>
+                                        </t>
+                                    </div>
+                                </t>
+                                
+                            </nav>
+                        </div>
+                        
+                    </t>
+                </div>
+            </div>
+        </section>
+    </template>
+    
+    <template id="submenu_inherit_dynamic" inherit_id="website.submenu">
+        <xpath expr="//t[@t-if='submenu.is_mega_menu']/div" position="replace">
+            <div t-if="not is_mobile"
+                 t-attf-class="dropdown-menu o_mega_menu #{submenu.mega_menu_classes}"
+                 data-name="Mega Menu"
+                 role="menuitem">
+                
+                <t t-if="submenu.use_dynamic_mega_menu">
+                    <t t-call="website_mega_menu_submenu.dynamic_mega_menu_from_db"/>
+                </t>
+                
+                <t t-else="">
+                    <t t-out="submenu.mega_menu_content"/>
+                </t>
+                
+            </div>
+        </xpath>
+    </template>
+    
+</odoo>

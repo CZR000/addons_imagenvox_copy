@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_saleorder_document_inherit_custom" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//th[@name='th_taxes']" position="attributes">
+            <attribute name="t-if">doc.company_id.show_sale_line_taxes</attribute>
+        </xpath>
+
+        <xpath expr="//td[@name='td_taxes']" position="attributes">
+            <attribute name="t-if">doc.company_id.show_sale_line_taxes</attribute>
+        </xpath>
+
+        <xpath expr="//th[@name='th_subtotal']" position="attributes">
+            <attribute name="t-if">doc.company_id.show_sale_line_subtotal</attribute>
+        </xpath>
+
+        <xpath expr="//td[@name='td_subtotal']" position="attributes">
+            <attribute name="t-if">not line.is_downpayment and doc.company_id.show_sale_line_subtotal</attribute>
+        </xpath>
+    </template>
+
+    <template id="document_tax_totals_inherit_hide_igv" inherit_id="sale.document_tax_totals">
+        <xpath expr="//tr[hasclass('o_taxes')]" position="attributes">
+            <attribute name="t-if">env.company.show_sale_totals_taxes</attribute>
+        </xpath>
+    </template>
+</odoo>

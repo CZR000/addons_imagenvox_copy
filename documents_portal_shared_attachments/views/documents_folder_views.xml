@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="folder_view_form_share_button" model="ir.ui.view">
+        <field name="name">documents.folders.form.share.button</field>
+        <field name="model">documents.folders</field>
+        <field name="inherit_id" ref="documents_portal_bulk_upload.view_documents_folders_form_bulk_upload"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_bulk_upload']" position="after">
+                <button name="%(action_share_to_folders_wizard)d"
+                        type="action"
+                        string="Compartir a otras carpetas"
+                        class="btn-secondary"
+                        icon="fa-share-alt"
+                        invisible="is_day_directory"
+                        context="{'current_folder_id': id}"/>
+                <button name="action_classify_documents"
+                        type="object"
+                        string="Clasificar archivos (masivo)"
+                        class="btn-primary"
+                        icon="fa-random"
+                        invisible="not is_day_directory"
+                        confirm="Se crearán o actualizarán las carpetas de paciente con los archivos de esta carpeta. ¿Continuar?"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Doctores con acceso" name="patient_doctors"
+                      invisible="not is_patient_directory">
+                    <field name="doctor_folder_ids" options="{'no_create': True}">
+                        <list string="Doctores">
+                            <field name="complete_name" string="Carpeta del doctor"/>
+                        </list>
+                    </field>
+                </page>
+                <page string="Pacientes" name="doctor_patients"
+                      invisible="not is_doctor_directory">
+                    <field name="patient_folder_ids" options="{'no_create': True}"
+                           domain="[('is_patient_directory', '=', True)]">
+                        <list string="Pacientes">
+                            <field name="name" string="Paciente"/>
+                            <field name="attachment_count" string="Archivos"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+            <xpath expr="//notebook" position="before">
+                <group name="day_directory_group">
+                    <field name="is_patient_directory" invisible="1"/>
+                    <field name="is_doctor_directory" invisible="1"/>
+                    <field name="is_day_directory"/>
+                    <field name="last_classification_date" invisible="not is_day_directory"/>
+                    <field name="last_classification_uid" invisible="not is_day_directory"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+    
+    <record id="folder_view_form_shared_attachments" model="ir.ui.view">
+        <field name="name">documents.folders.form.shared.attachments</field>
+        <field name="model">documents.folders</field>
+        <field name="inherit_id" ref="documents_portal_management_extension.folder_view_form_inherit_new_attachment"/>
+        <field name="arch" type="xml">
+
+            <!-- ═══ CARPETA PRINCIPAL: tab Documentos ═══ -->
+            <xpath expr="//page[@invisible='not is_principal']/field[@name='attachment_ids']"
+                   position="replace">
+                <field name="all_attachment_ids" context="{'current_folder_id': id}">
+                    <list string="Documentos" create="false" delete="false">
+                        <field name="name"/>
+                        <field name="folder_id" column_invisible="1"/>
+                        <field name="mimetype" column_invisible="1"/>
+                        <field name="type"/>
+                        <field name="create_uid"/>
+                        <field name="create_date" readonly="1"/>
+                        <field name="id" widget="attachment_action_buttons" string="Acciones" nolabel="1"/>
+                        <button string="Descargar" type="object" name="action_download"
+                                icon="fa-download" class="btn btn-sm"/>
+                        <button string="Eliminar"
+                                type="object" name="action_delete_from_current_folder"
+                                icon="fa-trash" class="btn btn-sm text-danger"
+                                invisible="folder_id != parent.id"
+                                confirm="¿Eliminar este archivo? Si está compartido en otras carpetas, se le pedirá confirmar el impacto."/>
+                        <button string="Quitar de esta carpeta"
+                                type="object" name="action_remove_from_current_folder"
+                                icon="fa-times" class="btn btn-sm text-warning"
+                                invisible="folder_id == parent.id"
+                                context="{'current_folder_id': parent.id}"
+                                confirm="Se quitará solo de esta carpeta. El archivo seguirá disponible en su carpeta original."/>
+                    </list>
+                </field>
+            </xpath>
+
+            <!-- ═══ CARPETA HIJA: tab Documentos ═══ -->
+            <xpath expr="//page[@invisible='is_principal']/field[@name='attachment_ids']"
+                   position="replace">
+                <field name="all_attachment_ids" context="{'current_folder_id': id}">
+                    <list string="Documentos" create="false" delete="false">
+                        <field name="name"/>
+                        <field name="folder_id" column_invisible="1"/>
+                        <field name="mimetype" column_invisible="1"/>
+                        <field name="type"/>
+                        <field name="create_uid"/>
+                        <field name="create_date" readonly="1"/>
+                        <field name="id" widget="attachment_action_buttons" string="Acciones" nolabel="1"/>
+                        <button string="Descargar" type="object" name="action_download"
+                                icon="fa-download" class="btn btn-sm"/>
+                        <button string="Eliminar"
+                                type="object" name="action_delete_from_current_folder"
+                                icon="fa-trash" class="btn btn-sm text-danger"
+                                invisible="folder_id != parent.id"
+                                confirm="¿Eliminar este archivo? Si está compartido en otras carpetas, se le pedirá confirmar el impacto."/>
+                        <button string="Quitar de esta carpeta"
+                                type="object" name="action_remove_from_current_folder"
+                                icon="fa-times" class="btn btn-sm text-warning"
+                                invisible="folder_id == parent.id"
+                                context="{'current_folder_id': parent.id}"
+                                confirm="Se quitará solo de esta carpeta. El archivo seguirá disponible en su carpeta original."/>
+                    </list>
+                </field>
+            </xpath>
+
+        </field>
+    </record>
+
+</odoo>

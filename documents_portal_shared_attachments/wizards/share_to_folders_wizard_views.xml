@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ═══ Compartir a otras carpetas (manual) ═══ -->
+    <record id="view_share_to_folders_wizard_form" model="ir.ui.view">
+        <field name="name">documents.share.to.folders.wizard.form</field>
+        <field name="model">documents.share.to.folders.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Compartir a otras carpetas">
+                <group>
+                    <field name="source_folder_id"/>
+                    <field name="target_folder_ids" widget="many2many_tags"
+                           options="{'no_create': True}"/>
+                    <field name="attachment_ids" widget="many2many_tags"
+                           options="{'no_create': True}"/>
+                </group>
+                <footer>
+                    <button name="action_share" type="object" string="Compartir" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Sin binding: solo se abre desde el botón del form de la carpeta -->
+    <record id="action_share_to_folders_wizard" model="ir.actions.act_window">
+        <field name="name">Compartir a otras carpetas</field>
+        <field name="res_model">documents.share.to.folders.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_share_to_folders_wizard_form"/>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ═══ Compartir carpetas de paciente a doctor(es) (acción masiva en lista) ═══ -->
+    <record id="view_share_patients_to_doctors_wizard_form" model="ir.ui.view">
+        <field name="name">documents.share.patients.to.doctors.wizard.form</field>
+        <field name="model">documents.share.patients.to.doctors.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Asignar a doctor(es)">
+                <div class="alert alert-info" role="alert">
+                    Los doctores quedarán enlazados a estos pacientes: recibirán ahora
+                    <b><field name="attachment_count" readonly="1" class="oe_inline"/></b> archivo(s)
+                    y, desde ese momento, cada archivo nuevo del paciente automáticamente.
+                </div>
+                <div class="alert alert-warning" role="alert" invisible="not ignored_count">
+                    Algunas carpeta(s) seleccionadas no son de paciente y se ignorarán.
+                </div>
+                <div class="alert alert-danger" role="alert" invisible="not users_without_folder_ids">
+                    Estos doctores no tienen carpeta de portal asignada y no recibirán archivos:
+                    <field name="users_without_folder_ids" widget="many2many_tags" readonly="1" class="oe_inline"/>
+                </div>
+                <group>
+                    <field name="doctor_user_ids" widget="many2many_tags"
+                           options="{'no_create': True}"/>
+                    <field name="patient_folder_ids" widget="many2many_tags" force_save="1"/>
+                    <field name="ignored_count" invisible="1" force_save="1"/>
+                </group>
+                <footer>
+                    <button name="action_share" type="object" string="Asignar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_share_patients_to_doctors_wizard" model="ir.actions.act_window">
+        <field name="name">Asignar a doctor(es)</field>
+        <field name="res_model">documents.share.patients.to.doctors.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_share_patients_to_doctors_wizard_form"/>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="documents_portal_management.model_documents_folders"/>
+        <field name="binding_view_types">list</field>
+    </record>
+
+    <!-- ═══ Popup de resumen (clasificación / compartir a doctores) ═══ -->
+    <record id="view_share_result_wizard_form" model="ir.ui.view">
+        <field name="name">documents.share.result.wizard.form</field>
+        <field name="model">documents.share.result.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Resumen">
+                <field name="summary_html" readonly="1" nolabel="1"/>
+                <footer>
+                    <button string="Cerrar" special="cancel" class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

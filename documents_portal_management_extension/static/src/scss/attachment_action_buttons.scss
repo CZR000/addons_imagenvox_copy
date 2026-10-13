@@ -1,0 +1,15 @@
+.attachment-action-buttons {
+    .o_attachment_btn {
+        padding: 2px 6px;
+        line-height: 1.2;
+
+        i {
+            font-size: 12px;
+        }
+
+        &:hover {
+            background-color: var(--bs-primary);
+            color: white;
+        }
+    }
+}

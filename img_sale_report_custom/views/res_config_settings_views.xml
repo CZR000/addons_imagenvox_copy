@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_inherit_sale_custom" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.sale.custom</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='quotation_order_setting_container']" position="inside">
+                <setting id="sale_report_custom" string="Reporte Personalizado" help="Configura opciones visuales, estructura y datos a mostrar en el reporte PDF de ventas para esta empresa." company_dependent="1">
+                    <div class="content-group">
+                        <div class="mt-3 d-flex align-items-center gap-2">
+                            <field name="show_sale_line_taxes" widget="boolean_toggle" class="oe_inline mb-0"/>
+                            <label for="show_sale_line_taxes" string="Líneas: Columna de Impuestos" class="o_light_label mb-0"/>
+                        </div>
+
+                        <div class="mt-2 d-flex align-items-center gap-2">
+                            <field name="show_sale_line_subtotal" widget="boolean_toggle" class="oe_inline mb-0"/>
+                            <label for="show_sale_line_subtotal" string="Líneas: Columna de Importe" class="o_light_label mb-0"/>
+                        </div>
+
+                        <div class="mt-2 d-flex align-items-center gap-2">
+                            <field name="show_sale_totals_taxes" widget="boolean_toggle" class="oe_inline mb-0"/>
+                            <label for="show_sale_totals_taxes" string="Totales: fila de IGV" class="o_light_label mb-0"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>
