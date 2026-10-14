@@ -40,11 +40,30 @@ class IrAttachment(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         records = super().create(vals_list)
+        # Última actualización: carpetas donde el documento nace ya compartido
+        records.sudo().mapped('shared_folder_ids')._touch_last_update()
         if not self.env.context.get('skip_doctor_sync'):
             records.filtered('folder_id')._sync_doctor_folders({})
         return records
 
     def write(self, vals):
+        if 'shared_folder_ids' not in vals:
+            return self._write_doctor_sync(vals)
+        # Última actualización: las carpetas que reciben un documento compartido
+        # (p. ej. doctor que recibe el archivo subido al paciente) toman la
+        # fecha de subida del documento.
+        before = {att.id: set(att.shared_folder_ids.ids) for att in self.sudo()}
+        res = self._write_doctor_sync(vals)
+        dates = {}
+        for att in self.sudo():
+            for folder_id in set(att.shared_folder_ids.ids) - before.get(att.id, set()):
+                if not dates.get(folder_id) or dates[folder_id] < att.create_date:
+                    dates[folder_id] = att.create_date
+        if dates:
+            self.env['documents.folders']._apply_last_update_dates(dates)
+        return res
+
+    def _write_doctor_sync(self, vals):
         if self.env.context.get('skip_doctor_sync') or not (
                 {'folder_id', 'shared_folder_ids'} & set(vals)):
             return super().write(vals)
